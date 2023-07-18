@@ -41,12 +41,26 @@ const getSale = async (req, res) => {
                 $group : {
                     _id : null, 
                     totalAmount: {$sum: "$price"},
+                    itemsSold: {
+                        $sum: {
+                          $cond: [{ $eq: ["$sold", true] }, 1, 0]
+                        }
+                    },
+                    itemsNotSold: {
+                        $sum: {
+                          $cond: [{ $eq: ["$sold", false] }, 1, 0]
+                        }
+                    }
                 }
             }
 
         ]);
 
-        res.json({totalSale: totalSale[0]?.totalAmount || 0 });
+        res.json({totalSale: totalSale[0]?.totalAmount || 0,
+            itemsSold: totalSale[0]?.itemsSold || 0,
+            itemsNotSold: totalSale[0]?.itemsNotSold || 0
+        
+        });
     }
     catch(e) {
         console.log(e);
